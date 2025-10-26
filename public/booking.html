@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Book Room | Hotel Management</title>
+
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+</head>
+<body class="bg-light">
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+  <div class="container">
+    <a class="navbar-brand" href="rooms.html">Hotel Management</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item"><a class="nav-link" href="register.html">Register</a></li>
+        <li class="nav-item"><a class="nav-link" href="login.html">Login</a></li>
+        <li class="nav-item"><a class="nav-link" href="rooms.html">Rooms</a></li>
+        <li class="nav-item"><a class="nav-link" href="mybookings.html">My Bookings</a></li>
+        <li class="nav-item"><a class="nav-link" href="#" id="logoutBtn">Logout</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<script>
+  // Logout functionality
+  const logoutBtn = document.getElementById("logoutBtn");
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", () => {
+      localStorage.removeItem("customerId"); // clear login info
+      alert("Logged out successfully!");
+      window.location.href = "/login.html"; // redirect to login
+    });
+  }
+
+  // Hide logout if user is not logged in
+  if (!localStorage.getItem("customerId")) {
+    logoutBtn.style.display = "none";
+  }
+
+  // Highlight active page in navbar
+  const links = document.querySelectorAll('.nav-link');
+  links.forEach(link => {
+    if (link.href === window.location.href) {
+      link.classList.add('active');
+    }
+  });
+
+</script>
+
+
+    <div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
+        <div class="card shadow p-4" style="width: 28rem;">
+            <h3 class="text-center mb-4">Book Your Room</h3>
+
+            <form id="bookingForm">
+                <div class="mb-3">
+                    <label class="form-label">From Date</label>
+                    <input type="date" class="form-control" id="dateFrom" required />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">To Date</label>
+                    <input type="date" class="form-control" id="dateTo" required />
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Book Room</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+document.getElementById("bookingForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const roomId = urlParams.get("roomId");
+    const customerId = localStorage.getItem("customerId");
+
+    if (!customerId) {
+        alert("Please login first");
+        window.location.href = "/login.html";
+        return;
+    }
+
+    const booking = {
+        customerId,
+        roomId,
+        dateFrom: document.getElementById("dateFrom").value,
+        dateTo: document.getElementById("dateTo").value
+    };
+
+    try {
+        const res = await fetch("/api/bookings", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(booking)
+        });
+
+        const data = await res.json();
+        if (res.ok) {
+            alert(data.message);
+            window.location.href = "/mybookings.html";
+        } else {
+            alert(data.error);
+        }
+    } catch (err) {
+        console.error(err);
+        alert("Something went wrong");
+    }
+});
+</script>
+
+
+</body>
+</html>

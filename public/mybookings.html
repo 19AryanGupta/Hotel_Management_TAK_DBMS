@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Bookings | Hotel Management</title>
+
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+</head>
+<body class="bg-light">
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+  <div class="container">
+    <a class="navbar-brand" href="rooms.html">Hotel Management</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item"><a class="nav-link" href="register.html">Register</a></li>
+        <li class="nav-item"><a class="nav-link" href="login.html">Login</a></li>
+        <li class="nav-item"><a class="nav-link" href="rooms.html">Rooms</a></li>
+        <li class="nav-item"><a class="nav-link" href="mybookings.html">My Bookings</a></li>
+        <li class="nav-item"><a class="nav-link" href="#" id="logoutBtn">Logout</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<script>
+  // Logout functionality
+  const logoutBtn = document.getElementById("logoutBtn");
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", () => {
+      localStorage.removeItem("customerId"); // clear login info
+      alert("Logged out successfully!");
+      window.location.href = "/login.html"; // redirect to login
+    });
+  }
+
+  // Hide logout if user is not logged in
+  if (!localStorage.getItem("customerId")) {
+    logoutBtn.style.display = "none";
+  }
+
+  // Highlight active page in navbar
+  const links = document.querySelectorAll('.nav-link');
+  links.forEach(link => {
+    if (link.href === window.location.href) {
+      link.classList.add('active');
+    }
+  });
+
+</script>
+
+    <div class="container my-5">
+        <h2 class="text-center mb-4">My Bookings</h2>
+        <div id="bookingList" class="row">
+            <!-- Booking cards will appear here -->
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+async function loadBookings() {
+    const customerId = localStorage.getItem("customerId");
+    if (!customerId) {
+        alert("Please login first");
+        window.location.href = "/login.html";
+        return;
+    }
+
+    try {
+        const res = await fetch(`/api/bookings/${customerId}`);
+        const bookings = await res.json();
+
+        const container = document.getElementById("bookingList");
+        bookings.forEach(b => {
+            const card = document.createElement("div");
+            card.classList.add("col-md-4", "mb-3");
+            card.innerHTML = `
+                <div class="card h-100 shadow">
+                    <div class="card-body">
+                        <h5 class="card-title">${b.roomId.roomType}</h5>
+                        <p class="card-text">From: ${new Date(b.dateFrom).toLocaleDateString()}</p>
+                        <p class="card-text">To: ${new Date(b.dateTo).toLocaleDateString()}</p>
+                    </div>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+loadBookings();
+</script>
+
+
+</body>
+</html>
