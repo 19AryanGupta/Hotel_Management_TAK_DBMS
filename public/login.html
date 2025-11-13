@@ -1,124 +1,78 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Login | Hotel Management</title>
-
-    <!-- Bootstrap CSS -->
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Customer Login - Hotel Management</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body class="bg-light">
-
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
-  <div class="container">
-    <a class="navbar-brand" href="rooms.html">Hotel Management</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav ms-auto">
-        <li class="nav-item"><a class="nav-link" href="register.html">Register</a></li>
-        <li class="nav-item"><a class="nav-link" href="login.html">Login</a></li>
-        <li class="nav-item"><a class="nav-link" href="rooms.html">Rooms</a></li>
-        <li class="nav-item"><a class="nav-link" href="mybookings.html">My Bookings</a></li>
-        <li class="nav-item"><a class="nav-link" href="#" id="logoutBtn">Logout</a></li>
-      </ul>
+<body>
+  
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+    <div class="container">
+      <a class="navbar-brand" href="rooms.html">Hotel Management</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link" href="register.html">Register</a></li>
+          <li class="nav-item"><a class="nav-link active" href="login.html">Login</a></li>
+          <li class="nav-item"><a class="nav-link" href="rooms.html">Rooms</a></li>
+        </ul>
+      </div>
     </div>
+  </nav>
+
+  <!-- Login Form -->
+  <div class="container mt-5" style="max-width: 500px;">
+    <h3 class="text-center mb-4">Customer Login</h3>
+
+    <form id="loginForm">
+      <div class="mb-3">
+        <label>Email</label>
+        <input type="email" class="form-control" id="email" required />
+      </div>
+      <div class="mb-3">
+        <label>Password</label>
+        <input type="password" class="form-control" id="password" required />
+      </div>
+      <button type="submit" class="btn btn-primary w-100">Login</button>
+      <p class="text-center mt-2">Don’t have an account? <a href="register.html">Register here</a></p>
+    </form>
   </div>
-</nav>
 
-<script>
-  // Logout functionality
-  const logoutBtn = document.getElementById("logoutBtn");
-  if (logoutBtn) {
-    logoutBtn.addEventListener("click", () => {
-      localStorage.removeItem("customerId"); // clear login info
-      alert("Logged out successfully!");
-      window.location.href = "/login.html"; // redirect to login
-    });
-  }
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-  // Hide logout if user is not logged in
-  if (!localStorage.getItem("customerId")) {
-    logoutBtn.style.display = "none";
-  }
+  <script>
+    document.getElementById("loginForm").addEventListener("submit", async function (e) {
+      e.preventDefault();
 
-  // Highlight active page in navbar
-  const links = document.querySelectorAll('.nav-link');
-  links.forEach(link => {
-    if (link.href === window.location.href) {
-      link.classList.add('active');
-    }
-  });
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
 
-</script>
-
-    <div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
-        <div class="card shadow p-4" style="width: 28rem;">
-
-            <h3 class="text-center mb-4">Customer Login</h3>
-
-            <form id="loginForm">
-                <div class="mb-3">
-                    <label class="form-label">Email Address</label>
-                    <input type="email" class="form-control" id="email" required />
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label">Password</label>
-                    <input type="password" class="form-control" id="password" required />
-                </div>
-
-                <button type="submit" class="btn btn-primary w-100">
-                    Login
-                </button>
-
-                <p class="text-center mt-3">
-                    Don’t have an account? <a href="/register.html">Register here</a>
-                </p>
-            </form>
-
-        </div>
-    </div>
-
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
-    <script>
-document.getElementById("loginForm").addEventListener("submit", async function(e) {
-    e.preventDefault();
-
-    const user = {
-        email: document.getElementById("email").value,
-        password: document.getElementById("password").value
-    };
-
-    try {
+      try {
         const res = await fetch("/api/auth/login", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(user)
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
         });
 
         const data = await res.json();
+
         if (res.ok) {
-            alert(data.message);
-            localStorage.setItem("customerId", data.customerId); // store logged-in user
-            window.location.href = "/rooms.html"; // go to rooms page
+          localStorage.setItem("customerId", data.customerId);
+          alert("Login successful!");
+          window.location.href = "rooms.html";
         } else {
-            alert(data.error);
+          alert(data.message || "Login failed");
         }
-    } catch (err) {
+      } catch (err) {
+        alert("Error logging in. Try again later.");
         console.error(err);
-        alert("Something went wrong");
-    }
-});
-</script>
-
-
+      }
+    });
+  </script>
 </body>
 </html>

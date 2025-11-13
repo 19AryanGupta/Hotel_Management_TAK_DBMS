@@ -1,48 +1,56 @@
-// Load environment variables
-require('dotenv').config();
+// server.js
 
-// Import dependencies
+require('dotenv').config();
 const express = require('express');
-const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require('path');
 
-// Create Express app
+// Replace mongoose with Sequelize init
+const { sequelize } = require('./models');
+
+// Initialize express app
 const app = express();
 
 // Middleware
-app.use(cors()); // allow cross-origin requests if needed
-app.use(express.json()); // parse JSON bodies
-app.use(express.urlencoded({ extended: true })); // parse form submissions
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// Serve static frontend files from 'public' folder
+// Serve static frontend files
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Default route
+// Sequelize authentication & sync
+(async () => {
+  try {
+    await sequelize.authenticate();
+    await sequelize.sync(); // creates tables if not exist
+    console.log("Connected to MySQL via Sequelize");
+  } catch (err) {
+    console.error("Error connecting to MySQL:", err);
+    process.exit(1);
+  }
+})();
+
+// API Routes
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/rooms', require('./routes/rooms'));
+app.use('/api/bookings', require('./routes/bookings'));
+app.use('/api/invoices', require('./routes/invoices'));
+
+const adminRoutes = require("./routes/admin");
+app.use("/api/admin", adminRoutes);
+
+
+// Root Route
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public/register.html')); // open register page by default
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-})
-.then(() => console.log("MongoDB connected"))
-.catch((err) => console.error("MongoDB connection error:", err));
-
-// Start server
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+// Add this before the "app.listen" part in server.js
+app.get('/logout', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'logout.html'));
 });
 
-// Import routes
-const authRoutes = require("./routes/auth");
-const roomsRoutes = require("./routes/rooms");
-const bookingRoutes = require("./routes/bookings");
-
-// Use routes
-app.use("/api/auth", authRoutes);
-app.use("/api/rooms", roomsRoutes);
-app.use("/api/bookings", bookingRoutes);
+// Listen on port
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

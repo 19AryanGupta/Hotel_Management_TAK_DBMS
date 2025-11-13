@@ -1,14 +1,64 @@
-const express = require("express");
-const router = express.Router();
-const Room = require("../models/Room");
+// routes/rooms.js
 
-// Get all rooms
-router.get("/", async (req, res) => {
+const express = require('express');
+const Room = require('../models/Room');
+const router = express.Router();
+
+function capacityBasedOnType(roomType) {
+    switch (roomType) {
+        case 'Single': return 1;
+        case 'Double': return 2;
+        case 'Suite': return 4;
+        case 'Deluxe': return 3;
+        default: return 2;
+    }
+}
+
+// ✅ Customer: Get only available rooms (mapped for frontend)
+router.get('/', async (req, res) => {
     try {
-        const rooms = await Room.find();
-        res.json(rooms);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
+        const availableRooms = await Room.findAll({ where: { isAvailable: true }, order: [['roomNumber','ASC']] });
+        const mapped = availableRooms.map(r => ({
+            _id: r.id,
+            roomNumber: r.roomNumber,
+            type: r.roomType,
+            price: r.pricePerNight,
+            capacity: capacityBasedOnType(r.roomType),
+            isAvailable: r.isAvailable
+        }));
+        res.json(mapped);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// GET single room by id (mapped)
+router.get('/:id', async (req, res) => {
+    try {
+        const r = await Room.findByPk(req.params.id);
+        if (!r) return res.status(404).json({ message: 'Room not found' });
+        res.json({
+            _id: r.id,
+            roomNumber: r.roomNumber,
+            type: r.roomType,
+            price: r.pricePerNight,
+            capacity: capacityBasedOnType(r.roomType),
+            isAvailable: r.isAvailable
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// ✅ Admin: Add new room
+router.post('/', async (req, res) => {
+    const { roomNumber, roomType, pricePerNight, isAvailable } = req.body;
+
+    try {
+        const newRoom = await Room.create({ roomNumber, roomType, pricePerNight, isAvailable });
+        res.status(201).json({ message: "Room added successfully", room: { ...newRoom.get(), _id: newRoom.id } });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
     }
 });
 
