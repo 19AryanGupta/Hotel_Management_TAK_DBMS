@@ -4,6 +4,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs'); // added to read and inject into HTML
 
 // Replace mongoose with Sequelize init
 const { sequelize } = require('./models');
@@ -43,12 +44,24 @@ app.use("/api/admin", adminRoutes);
 
 // Root Route
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    const indexPath = path.join(__dirname, 'public', 'index.html');
+    fs.readFile(indexPath, 'utf8', (err, data) => {
+      if (err) return res.status(500).send('Error loading page');
+      const inject = '<link rel="stylesheet" href="/css/contrast.css">';
+      const modified = data.includes('</head>') ? data.replace('</head>', `${inject}\n</head>`) : (inject + data);
+      res.send(modified);
+    });
 });
 
 // Add this before the "app.listen" part in server.js
 app.get('/logout', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'logout.html'));
+  const logoutPath = path.join(__dirname, 'public', 'logout.html');
+  fs.readFile(logoutPath, 'utf8', (err, data) => {
+    if (err) return res.status(500).send('Error loading page');
+    const inject = '<link rel="stylesheet" href="/css/contrast.css">';
+    const modified = data.includes('</head>') ? data.replace('</head>', `${inject}\n</head>`) : (inject + data);
+    res.send(modified);
+  });
 });
 
 // Listen on port

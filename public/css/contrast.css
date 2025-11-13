@@ -1,0 +1,39 @@
+/* Override colors to ensure good contrast. Tweak --bg and --fg as desired. */
+:root {
+  --bg: #ffffff;
+  --fg: #111111;
+  --accent: #0b5fff;
+}
+
+/* Apply forced background and foreground colors site-wide */
+html, body {
+  background-color: var(--bg) !important;
+  color: var(--fg) !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Ensure headings, links and form controls are readable */
+h1,h2,h3,h4,h5,h6 {
+  color: var(--fg) !important;
+}
+a, a:link, a:active {
+  color: var(--accent) !important;
+}
+a:visited { opacity: 0.9; }
+button, input, textarea, select {
+  color: var(--fg) !important;
+  background-color: transparent !important;
+}
+
+/* make sure images with text overlays remain readable */
+*::selection { background: var(--accent); color: #fff; }
+
+/* Optional: auto switch to dark-friendly palette when user prefers dark mode */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0b0f14;
+    --fg: #f5f7fa;
+    --accent: #66b2ff;
+  }
+}
