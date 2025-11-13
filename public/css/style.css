@@ -1,0 +1,97 @@
+/* Global styles for Electric Blue background and Neon Pink navbar */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+
+:root{
+  --electric-blue-1: #00bfff;
+  --electric-blue-2: #0066ff;
+  --neon-pink: #ff2d95;
+  --neon-pink-2: #ff6bb3;
+  --muted-white: rgba(255,255,255,0.95);
+}
+
+html,body{
+  height:100%;
+  margin:0;
+  font-family: 'Poppins', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+  background: radial-gradient(1200px 600px at 10% 10%, var(--electric-blue-1), var(--electric-blue-2));
+  color: var(--muted-white);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+}
+
+/* Navbar overrides */
+.navbar{
+  background: linear-gradient(90deg, var(--neon-pink), var(--neon-pink-2)) !important;
+  box-shadow: 0 6px 30px rgba(0,0,0,0.25);
+}
+.navbar .navbar-brand{
+  color: #fff !important;
+  font-weight:700;
+  letter-spacing:0.4px;
+  text-shadow: 0 1px 0 rgba(0,0,0,0.25);
+}
+.navbar .nav-link{
+  color: rgba(255,255,255,0.95) !important;
+  font-weight:600;
+}
+.navbar .nav-link:hover{
+  color: #000 !important;
+  text-shadow: none;
+}
+
+/* Hero and content tweaks */
+.container h1, .container h2, .container h3{
+  color: #fff;
+  text-shadow: 0 6px 30px rgba(0,0,0,0.35);
+}
+.lead{
+  color: rgba(255,255,255,0.95);
+}
+
+/* Buttons: use neon pink for primary actions */
+.btn-primary{
+  background: linear-gradient(90deg,var(--neon-pink),var(--neon-pink-2));
+  border: none;
+  color: #fff;
+  box-shadow: 0 6px 18px rgba(255,45,149,0.15), 0 1px 0 rgba(0,0,0,0.2) inset;
+}
+.btn-primary:hover{
+  filter:brightness(1.03);
+}
+
+/* Cards & tables contrast */
+.card, .table{
+  background: rgba(255,255,255,0.06);
+  border: none;
+  color: var(--muted-white);
+}
+
+.footer, footer{
+  color: rgba(255,255,255,0.85);
+}
+
+/* Make forms and inputs subtle on electric background */
+input, textarea, select{
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: #fff;
+}
+
+/* Responsive small polish */
+@media (max-width: 576px){
+  .navbar .nav-link{ font-size: 14px; }
+  .container h1{ font-size: 1.6rem; }
+}
+
+/* Accent decorative glow for hero buttons */
+.btn-primary:focus, .btn-primary:active{
+  outline: none !important;
+  box-shadow: 0 0 12px rgba(255,45,149,0.28);
+}
+
+/* Make links stand out */
+a{ color: var(--neon-pink); }
+a:hover{ color: var(--neon-pink-2); text-decoration: underline; }
+
+/* Utility: center a full-page message */
+.full-center{ min-height: calc(100vh - 80px); display:flex; align-items:center; justify-content:center; }
