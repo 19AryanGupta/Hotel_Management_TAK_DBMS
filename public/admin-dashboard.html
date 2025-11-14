@@ -33,6 +33,87 @@
       <button class="btn btn-secondary" onclick="adminLogout()">Logout</button>
     </div>
 
+    <!-- Add: Admin Stats panel (insert somewhere in the body of the admin dashboard) -->
+<section id="admin-stats" style="margin:18px 12px; font-family:Segoe UI, Roboto, Arial;">
+  <h2 style="margin-bottom:12px;">Admin — Overview</h2>
+  <div id="stats-grid" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px;">
+    <div class="stat-card" style="padding:14px; background:#fff; border-radius:8px; box-shadow:0 1px 4px rgba(0,0,0,0.08);">
+      <div style="font-size:13px; color:#666;">Total Rooms</div>
+      <div id="rooms-count" style="font-size:24px; font-weight:700; margin-top:6px;">—</div>
+    </div>
+
+    <div class="stat-card" style="padding:14px; background:#fff; border-radius:8px; box-shadow:0 1px 4px rgba(0,0,0,0.08);">
+      <div style="font-size:13px; color:#666;">Total Bookings</div>
+      <div id="bookings-count" style="font-size:24px; font-weight:700; margin-top:6px;">—</div>
+    </div>
+
+    <div class="stat-card" style="padding:14px; background:#fff; border-radius:8px; box-shadow:0 1px 4px rgba(0,0,0,0.08);">
+      <div style="font-size:13px; color:#666;">Revenue</div>
+      <div id="revenue-amount" style="font-size:24px; font-weight:700; margin-top:6px;">—</div>
+    </div>
+
+    <div class="stat-card" style="padding:14px; background:#fff; border-radius:8px; box-shadow:0 1px 4px rgba(0,0,0,0.08);">
+      <div style="font-size:13px; color:#666;">Guests / Customers</div>
+      <div id="guests-count" style="font-size:24px; font-weight:700; margin-top:6px;">—</div>
+    </div>
+
+    <div class="stat-card" style="padding:14px; background:#fff; border-radius:8px; box-shadow:0 1px 4px rgba(0,0,0,0.08);">
+      <div style="font-size:13px; color:#666;">Occupancy Rate</div>
+      <div id="occupancy-rate" style="font-size:24px; font-weight:700; margin-top:6px;">—</div>
+    </div>
+
+    <div class="stat-card" style="padding:14px; background:#fff; border-radius:8px; box-shadow:0 1px 4px rgba(0,0,0,0.08);">
+      <div style="font-size:13px; color:#666;">Active Bookings</div>
+      <div id="active-bookings" style="font-size:24px; font-weight:700; margin-top:6px;">—</div>
+    </div>
+  </div>
+
+  <div style="margin-top:12px; font-size:13px; color:#444;">
+    <span id="stats-source" style="color:#888;">Loading stats…</span>
+  </div>
+</section>
+
+<script>
+  // Small helper + default fallback data
+  const defaultStats = {
+    rooms: 120,
+    bookings: 86,
+    revenue: 45230.50,
+    guests: 164,
+    occupancyRate: 71, // percent
+    activeBookings: 21
+  };
+
+  function formatCurrency(n) {
+    return (typeof n === 'number' ? n : Number(n) || 0).toLocaleString(undefined, { style: 'currency', currency: 'USD' });
+  }
+
+  function renderStats(s, sourceLabel) {
+    document.getElementById('rooms-count').textContent = s.rooms ?? '0';
+    document.getElementById('bookings-count').textContent = s.bookings ?? '0';
+    document.getElementById('revenue-amount').textContent = formatCurrency(s.revenue ?? 0);
+    document.getElementById('guests-count').textContent = s.guests ?? '0';
+    document.getElementById('occupancy-rate').textContent = (s.occupancyRate ?? 0) + '%';
+    document.getElementById('active-bookings').textContent = s.activeBookings ?? '0';
+    document.getElementById('stats-source').textContent = 'Stats source: ' + sourceLabel;
+  }
+
+  // Try fetching live stats from backend route /api/admin/stats (if your backend exposes it)
+  fetch('/api/admin/stats', { cache: 'no-store' })
+    .then(resp => {
+      if (!resp.ok) throw new Error('no live stats');
+      return resp.json();
+    })
+    .then(data => {
+      // expected shape: { rooms, bookings, revenue, guests, occupancyRate, activeBookings }
+      renderStats(data, '/api/admin/stats');
+    })
+    .catch(() => {
+      // fallback to default local stats so you always see something on localhost
+      renderStats(defaultStats, 'local fallback');
+    });
+</script>
+
     <script>
         // Redirect to login if not authenticated
         if (!localStorage.getItem("adminLoggedIn")) {
