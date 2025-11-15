@@ -205,4 +205,46 @@ router.get('/invoices/:id', async (req, res) => {
   }
 });
 
+// Add: GET /api/admin/stats -> aggregated admin statistics from DB
+router.get('/stats', async (req, res) => {
+  try {
+    // total rooms
+    const totalRooms = await Room.count();
+
+    // total bookings (all records) and active bookings (status = 'Booked')
+    const totalBookings = await Booking.count();
+    const activeBookings = await Booking.count({ where: { status: 'Booked' } });
+
+    // total customers/guests
+    const totalCustomers = await Customer.count();
+
+    // revenue: prefer invoices (amountPaid). If no invoices, fallback to sum of booking.totalAmount
+    const revenueFromInvoices = await Invoice.sum('amountPaid');
+    let revenue = 0;
+    if (Number.isFinite(revenueFromInvoices) && revenueFromInvoices !== null) {
+      revenue = revenueFromInvoices;
+    } else {
+      const revenueFromBookings = await Booking.sum('totalAmount');
+      revenue = (Number.isFinite(revenueFromBookings) && revenueFromBookings !== null) ? revenueFromBookings : 0;
+    }
+
+    // occupancy rate: percent of rooms currently occupied (isAvailable = false)
+    const availableRooms = await Room.count({ where: { isAvailable: true } });
+    const occupied = totalRooms - availableRooms;
+    const occupancyRate = totalRooms > 0 ? Math.round((occupied / totalRooms) * 100) : 0;
+
+    res.json({
+      rooms: totalRooms,
+      bookings: totalBookings,
+      revenue,
+      guests: totalCustomers,
+      occupancyRate,
+      activeBookings
+    });
+  } catch (err) {
+    console.error('Admin stats error:', err);
+    res.status(500).json({ message: 'Server error fetching stats' });
+  }
+});
+
 module.exports = router;
